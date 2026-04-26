@@ -1,0 +1,9 @@
+Package: com.fix.cinemana.backgroundaudio
+Name: CinemanaFix
+Depends: mobilesubstrate
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: Background audio fix for Cinemana
+Maintainer: Me
+Author: Me
+Section: Tweaks
