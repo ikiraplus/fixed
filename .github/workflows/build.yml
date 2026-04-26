@@ -7,37 +7,40 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
+    env:
+      THEOS: /Users/runner/theos
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Theos
+      - name: Install Dependencies
+        run: brew install ldid dpkg xz
+
+      - name: Clone Theos
         run: |
-          sudo apt-get install -y git curl make
-          git clone --recursive https://github.com/theos/theos.git /opt/theos
-          echo "THEOS=/opt/theos" >> $GITHUB_ENV
+          git clone --recursive https://github.com/theos/theos.git $THEOS
 
-      - name: Download iOS SDK
+      - name: Download SDK
         run: |
-          curl -L -o iPhoneOS16.5.sdk.tar.xz \
-            "https://github.com/theos/sdks/releases/download/2023-09-29/iPhoneOS16.5.sdk.tar.xz"
-          tar -xf iPhoneOS16.5.sdk.tar.xz -C /opt/theos/sdks/
+          git clone https://github.com/theos/sdks.git /tmp/sdks
+          cp -r /tmp/sdks/iPhoneOS16.5.sdk $THEOS/sdks/
 
-      - name: Build tweak
+      - name: Build
         run: |
           cd CinemanaFix
-          make package FINALPACKAGE=1
+          make clean all 2>&1
 
       - name: Upload DEB artifact
         uses: actions/upload-artifact@v4
         with:
           name: CinemanaFix-deb
           path: CinemanaFix/packages/*.deb
+          if-no-files-found: warn
 
       - name: Upload dylib artifact
         uses: actions/upload-artifact@v4
         with:
           name: CinemanaFix-dylib
           path: CinemanaFix/.theos/obj/debug/*.dylib
+          if-no-files-found: warn
